@@ -1,28 +1,24 @@
 const Router = {
   init: () => {
-    document.querySelectorAll("a.navlink").forEach((link) => {
-      link.addEventListener("click", (event) => {
+    document.querySelectorAll("a.navlink").forEach((a) => {
+      a.addEventListener("click", (event) => {
         event.preventDefault();
-        const url = event.target.getAttribute("href");
-        Router.go(url);
+        const href = event.target.getAttribute("href");
+        Router.go(href);
       });
     });
-    // Event handler for URL changes
+    // It listen for history changes
     window.addEventListener("popstate", (event) => {
       Router.go(event.state.route, false);
     });
-
-    // Check the initial URL
+    // Process initial URL
     Router.go(location.pathname);
   },
   go: (route, addToHistory = true) => {
-    console.log(`Going to ${route}`);
-
     if (addToHistory) {
-      history.pushState({ route }, null, route);
+      history.pushState({ route }, "", route);
     }
     let pageElement = null;
-    // based on the URL, switch decides what content to display
     switch (route) {
       case "/":
         pageElement = document.createElement("menu-page");
@@ -33,19 +29,32 @@ const Router = {
       default:
         if (route.startsWith("/product-")) {
           pageElement = document.createElement("details-page");
-          const paramId = route.substring(route.lastIndexOf("-") + 1);
-          pageElement.dataset.id = paramId;
+          pageElement.dataset.productId = route.substring(
+            route.lastIndexOf("-") + 1
+          );
         }
+        break;
+    }
+    if (pageElement) {
+      // get current page element
+      let currentPage = document.querySelector("main").firstElementChild;
+      if (currentPage) {
+        let fadeOut = currentPage.animate([{ opacity: 1 }, { opacity: 0 }], {
+          duration: 200,
+        });
+        fadeOut.addEventListener("finish", () => {
+          currentPage.remove();
+          document.querySelector("main").appendChild(pageElement);
+          let fadeIn = pageElement.animate([{ opacity: 0 }, { opacity: 1 }], {
+            duration: 200,
+          });
+        });
+      } else {
+        document.querySelector("main").appendChild(pageElement);
+      }
     }
 
-    if (pageElement) {
-      //document.querySelector("main").children[0].remove();
-      const cache = document.querySelector("main");
-      cache.innerHTML = "";
-      cache.appendChild(pageElement);
-      window.scrollX = 0;
-      window.scrollY = 0;
-    }
+    window.scrollX = 0;
   },
 };
 

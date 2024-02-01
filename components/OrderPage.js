@@ -1,4 +1,6 @@
-export class OrderPage extends HTMLElement {
+import CartItem from "./CartItem.js";
+
+export default class OrderPage extends HTMLElement {
   #user = {
     name: "",
     phone: "",
@@ -45,6 +47,7 @@ export class OrderPage extends HTMLElement {
       const template = document.getElementById("order-form-template");
       const content = template.content.cloneNode(true);
       section.appendChild(content);
+      this.setFormBindings(this.root.querySelector("form"));
 
       let total = 0;
       for (let prodInCart of app.store.cart) {
@@ -61,9 +64,7 @@ export class OrderPage extends HTMLElement {
             </li>                
         `;
     }
-    this.setFormBindings(this.root.querySelector("form"));
   }
-
   setFormBindings(form) {
     form.addEventListener("submit", (event) => {
       event.preventDefault();
